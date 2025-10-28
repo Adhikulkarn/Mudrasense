@@ -344,10 +344,46 @@ function clearUpload() {
   document.getElementById('imagePreview').src = '';
 }
 
-function analyzeMudra() {
+async function analyzeMudra() {
   if (!currentMudra) return;
   
-  alert(`Great! You've uploaded an image for ${currentMudra.name}.\n\nIn a full implementation, this would:\n• Analyze your hand gesture\n• Compare it with the correct ${currentMudra.name} mudra\n• Provide feedback on accuracy\n• Suggest improvements\n\nThis feature requires AI/ML integration for gesture recognition.`);
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('mudraName', currentMudra.name);
+    formData.append('description', currentMudra.handFormation);
+
+    const response = await fetch('http://localhost:3000/analyze', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    
+    // Create and show feedback modal
+    const modal = document.createElement('div');
+    modal.className = 'feedback-modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h2>Analysis Results</h2>
+        <div class="feedback-text">${data.feedback}</div>
+        <button onclick="this.parentElement.parentElement.remove()">Close</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Sorry, there was an error analyzing your mudra. Please try again.');
+  }
 }
 
 // Initialize on page load
