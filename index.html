@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MudraSense - Learn Bharatanatyam Mudras</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Home Page -->
+  <div class="home-page" id="homePage">
+    <div class="mandala-bg"></div>
+    <div class="home-content">
+      <div class="logo-container">
+        <div class="logo-icon">🪷</div>
+        <h1 class="logo">MudraSense</h1>
+      </div>
+      <p class="tagline">Master the Art of Bharatanatyam Hand Gestures</p>
+      <p class="description">
+        Discover the elegant world of Bharatanatyam mudras through our comprehensive learning platform. 
+        Each hand gesture tells a story, conveys emotion, and brings ancient classical dance to life. 
+        Begin your journey into this timeless art form today.
+      </p>
+      <button class="cta-button" onclick="startLearning()">
+        <span>Start Learning</span>
+        <span class="arrow">→</span>
+      </button>
+      
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-icon">🙏</div>
+          <div class="feature-title">28 Mudras</div>
+          <div class="feature-desc">Complete Asamyuta Hastas</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📚</div>
+          <div class="feature-title">Detailed Guide</div>
+          <div class="feature-desc">Step-by-step learning</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✨</div>
+          <div class="feature-title">Interactive</div>
+          <div class="feature-desc">Engaging experience</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Learning Page -->
+  <div class="learning-page" id="learningPage">
+    <div class="header-pattern"></div>
+    <button class="back-button" onclick="goHome()">
+      <span>←</span> Back to Home
+    </button>
+    <div class="header">
+      <h1>Asamyuta Hastas</h1>
+      <p class="subtitle">Single-hand gestures in Bharatanatyam</p>
+    </div>
+    <div class="mudra-grid" id="mudraGrid"></div>
+  </div>
+
+  <!-- Mudra Detail Page -->
+  <div class="detail-page" id="detailPage">
+    <div class="header-pattern"></div>
+    <button class="back-button" onclick="backToLearning()">
+      <span>←</span> Back to Mudras
+    </button>
+    
+    <div class="detail-container">
+      <div class="detail-header">
+        <div class="detail-emoji" id="detailEmoji"></div>
+        <h1 id="detailName"></h1>
+        <div class="mudra-badge" id="detailBadge"></div>
+      </div>
+
+      <div class="detail-content">
+        <!-- Example Image Section -->
+        <div class="detail-section">
+          <h2>📸 Example Image</h2>
+          <div class="example-image-container">
+            <div class="example-image" id="exampleImage">
+              <span id="exampleEmoji"></span>
+            </div>
+            <p class="image-caption">Reference image for <span id="captionName"></span></p>
+          </div>
+        </div>
+
+        <!-- Detailed Description -->
+        <div class="detail-section">
+          <h2>📖 Detailed Description</h2>
+          <div class="description-box">
+            <div class="description-item">
+              <h3>Hand Formation</h3>
+              <p id="handFormation"></p>
+            </div>
+            <div class="description-item">
+              <h3>Symbolic Meaning</h3>
+              <p id="symbolicMeaning"></p>
+            </div>
+            <div class="description-item">
+              <h3>Usage in Dance</h3>
+              <p id="usageInDance"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="detail-section">
+          <h2>📤 Practice Your Mudra</h2>
+          <div class="upload-container">
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
+              <div class="upload-prompt">
+                <span class="upload-icon">📷</span>
+                <p class="upload-text">Click to upload or drag and drop</p>
+                <p class="upload-subtext">Upload your mudra image for practice</p>
+              </div>
+            </div>
+            <div class="preview-container" id="previewContainer" style="display: none;">
+              <img id="imagePreview" alt="Uploaded mudra">
+              <div class="preview-actions">
+                <button class="action-btn" onclick="clearUpload()">
+                  <span>🗑️</span> Remove
+                </button>
+                <button class="action-btn primary" onclick="analyzeMudra()">
+                  <span>✨</span> Analyze Mudra
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="mudras.js"></script>
+</body>
+</html>

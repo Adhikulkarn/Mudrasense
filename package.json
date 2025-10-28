@@ -1,0 +1,16 @@
+{
+  "name": "mudra-analyzer-backend",
+  "version": "1.0.0",
+  "description": "Bharatanatyam Mudra Analyzer backend using Gemini API",
+  "type": "module",
+  "main": "api/analyze.js",
+  "scripts": {
+    "start": "node api/analyze.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "multer": "^2.0.2"
+  }
+}
