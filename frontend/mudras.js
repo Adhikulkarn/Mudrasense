@@ -362,27 +362,64 @@ async function analyzeMudra() {
       body: formData
     });
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    // Try to parse JSON response (whether ok or not) so we can show server-provided messages
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      throw new Error('Invalid JSON response from server');
     }
 
-    const data = await response.json();
-    
-    // Create and show feedback modal
-    const modal = document.createElement('div');
-    modal.className = 'feedback-modal';
-    modal.innerHTML = `
-      <div class="modal-content">
-        <h2>Analysis Results</h2>
-        <div class="feedback-text">${data.feedback}</div>
-        <button onclick="this.parentElement.parentElement.remove()">Close</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
+    if (!response.ok) {
+      const serverMsg = data?.error || data?.details || 'Network response was not ok';
+      throw new Error(serverMsg);
+    }
+
+    // Always show server-returned feedback immediately (so UI never blocks)
+    let feedbackToShow = data.feedback || '';
+
+    // Try to fetch persisted copy if available, but failure should not block showing feedback
+    if (data.resultId) {
+      (async () => {
+        try {
+          const fileResp = await fetch(`http://localhost:3000/result/${data.resultId}`);
+          if (fileResp.ok) {
+            const fileJson = await fileResp.json();
+            if (fileJson?.feedback) {
+              // Update displayed feedback to the persisted version
+              showFeedback(fileJson.feedback, false);
+              return;
+            }
+          } else {
+            console.warn('Could not fetch stored result (status):', fileResp.status, fileResp.statusText);
+          }
+        } catch (err) {
+          console.warn('Error fetching stored result:', err);
+        }
+      })();
+    }
+
+    // Show feedback in-page immediately
+    showFeedback(feedbackToShow, false);
 
   } catch (error) {
-    console.error('Error:', error);
-    alert('Sorry, there was an error analyzing your mudra. Please try again.');
+    console.error('Error during analyze:', error);
+    // Try to extract server-provided message
+    let msg = 'Sorry, there was an error analyzing your mudra. Please try again.';
+    try {
+      if (error?.message) msg = error.message;
+    } catch (e) {}
+
+    // Display error in feedback section (avoid alert)
+    const feedbackSection = document.getElementById('feedbackSection');
+    const feedbackContent = document.getElementById('feedbackContent');
+    if (feedbackContent) {
+      feedbackContent.innerHTML = `<div class="error-message">${msg.replace(/\n/g,'<br>')}</div>`;
+      feedbackSection.style.display = 'block';
+      feedbackSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      alert(msg);
+    }
   }
 }
 
@@ -391,4 +428,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('homePage').style.display = 'flex';
   document.getElementById('learningPage').classList.remove('active');
   document.getElementById('detailPage').classList.remove('active');
+  // Attach analyze button listener (if present)
+  const analyzeButton = document.getElementById('analyzeButton');
+  if (analyzeButton) {
+    analyzeButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      analyzeMudra(e);
+    });
+  }
 });

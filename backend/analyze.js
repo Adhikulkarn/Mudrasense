@@ -16,6 +16,10 @@ const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 const upload = multer({ dest: uploadDir });
 
+// Directory where we persist analysis results as JSON files
+const resultsDir = path.join(process.cwd(), "results");
+if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir);
+
 app.post("/analyze", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
@@ -84,13 +88,32 @@ Be warm, supportive, and focus on encouragement. Students learn better with posi
     const response = await result.response;
     const feedback = response.text() || "No feedback generated.";
 
-    // Clean up uploaded file
-    fs.unlinkSync(imagePath);
+    // Persist the result to a JSON file so frontend (or user) can fetch it later
+    const resultId = `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    const resultPayload = {
+      success: true,
+      feedback,
+      mudraName,
+      timestamp: new Date().toISOString()
+    };
 
+    const resultPath = path.join(resultsDir, `${resultId}.json`);
+    try {
+      fs.writeFileSync(resultPath, JSON.stringify(resultPayload, null, 2), 'utf8');
+      console.log('💾 Saved analysis result to', resultPath);
+    } catch (writeErr) {
+      console.warn('⚠️ Failed to save result file:', writeErr);
+    }
+
+    // Clean up uploaded file
+    try { fs.unlinkSync(imagePath); } catch (e) { /* ignore */ }
+
+    // Return the resultId so frontend can fetch the stored JSON if desired
     res.status(200).json({ 
       success: true,
       feedback,
-      mudraName 
+      mudraName,
+      resultId
     });
 
   } catch (error) {
@@ -112,6 +135,25 @@ Be warm, supportive, and focus on encouragement. Students learn better with posi
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "Server is running", timestamp: new Date() });
+});
+
+// Serve stored analysis result by id
+app.get('/result/:id', (req, res) => {
+  const id = req.params.id;
+  console.log('🔎 GET /result/' + id);
+  const filePath = path.join(resultsDir, `${id}.json`);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ success: false, error: 'Result not found' });
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const parsed = JSON.parse(content);
+    return res.status(200).json(parsed);
+  } catch (err) {
+    console.error('Failed to read result file:', err);
+    return res.status(500).json({ success: false, error: 'Failed to read result' });
+  }
 });
 
 const port = process.env.PORT || 3000;
