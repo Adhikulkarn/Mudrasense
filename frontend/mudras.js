@@ -255,6 +255,28 @@ const asamyutaMudras = [
 
 let currentMudra = null;
 
+function showFeedback(feedback, isError) {
+    const modal = document.getElementById('feedbackModal');
+    const feedbackText = document.getElementById('modalFeedbackText');
+
+    if (feedbackText) {
+        feedbackText.innerHTML = feedback.replace(/\n/g, '<br>');
+        if (isError) {
+            feedbackText.style.color = 'red';
+        } else {
+            feedbackText.style.color = '#5d4e37'; // default feedback color
+        }
+        modal.style.display = 'flex';
+    }
+}
+
+// Add listener for close button
+document.getElementById('closeModalBtn').addEventListener('click', () => {
+    document.getElementById('feedbackModal').style.display = 'none';
+});
+
+
+
 function startLearning() {
   document.getElementById('homePage').style.display = 'none';
   document.getElementById('learningPage').classList.add('active');
@@ -357,7 +379,7 @@ async function analyzeMudra() {
     formData.append('mudraName', currentMudra.name);
     formData.append('description', currentMudra.handFormation);
 
-    const response = await fetch('http://localhost:3000/analyze', {
+    const response = await fetch('http://localhost:4000/analyze', {
       method: 'POST',
       body: formData
     });
